@@ -29,33 +29,3 @@ paths:
                     type: string
               example:
                 version: 0.1.0
-
-  /ghcallback:
-    get:
-      summary: Github OAuth Callback
-      description: After a user authenticates with github, he or she should be redirected to this url.
-      parameters:
-        - name: code
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: state
-          in: query
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Successful authentication, returns session token
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-              example:
-                token: PW75j9RYxtAvT6sap3eb5Yd8Yb7oofe1
-        401:
-          description: There was an error during authentication
