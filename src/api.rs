@@ -1,9 +1,14 @@
-use warp::{path, Filter, Rejection, Reply};
+use crate::account::session;
+use mongodb::Database;
+use warp::{any, get, path, Filter, Rejection, Reply};
 
-pub fn api() -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
-    let api_version = path("api")
+pub fn api(db: Database) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
+    let api = path("api");
+
+    let api_version = get()
         .and(path::end())
+        .and(session::session_middleware(db.clone()))
         .map(|| env!("CARGO_PKG_VERSION"));
 
-    warp::any().and(api_version)
+    any().and(api.and(api_version))
 }
