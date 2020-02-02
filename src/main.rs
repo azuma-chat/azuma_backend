@@ -1,11 +1,12 @@
 mod account;
 mod api;
+mod rejection;
 
 use dotenv::dotenv;
 use log::info;
 use mongodb::Client;
 use std::env;
-use tokio::{signal, sync::oneshot};
+use tokio::{signal, sync::oneshot, task};
 
 #[tokio::main]
 async fn main() {
@@ -24,7 +25,7 @@ async fn main() {
         warp::serve(api::api(db)).bind_with_graceful_shutdown(([127, 0, 0, 1], 7373), async {
             rx.await.ok();
         });
-    tokio::task::spawn(server);
+    task::spawn(server);
     info!("Listening on {}", addr);
 
     signal::ctrl_c()

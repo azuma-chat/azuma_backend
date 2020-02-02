@@ -1,11 +1,17 @@
-use core::convert::Infallible;
 use mongodb::Database;
-use warp::{cookie, Filter};
+use warp::{cookie, reject, Filter, Rejection};
 
-pub fn session_middleware(db: Database) -> impl Filter<Extract = (), Error = Infallible> + Clone {
-    cookie::optional("azuma_session")
-        .map(|session_cookie| {
+pub struct Session {
+    pub userid: i64,
+}
+
+pub fn session_middleware(
+    db: Database,
+) -> impl Filter<Extract = (Session,), Error = Rejection> + Clone {
+    cookie::optional("azuma_session").and_then(|session_cookie| {
+        async move {
             println!("{:?}", session_cookie);
-        })
-        .untuple_one()
+            Err(reject::not_found())
+        }
+    })
 }

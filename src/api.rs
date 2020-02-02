@@ -8,7 +8,7 @@ pub fn api(db: Database) -> impl Filter<Extract = (impl Reply,), Error = Rejecti
     let api_version = get()
         .and(path::end())
         .and(session::session_middleware(db.clone()))
-        .map(|| env!("CARGO_PKG_VERSION"));
+        .map(|_session| env!("CARGO_PKG_VERSION"));
 
     any().and(api.and(api_version))
 }
