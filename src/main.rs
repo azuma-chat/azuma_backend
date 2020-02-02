@@ -1,6 +1,7 @@
-mod account;
 mod api;
-mod rejection;
+mod handlers;
+mod models;
+mod routes;
 
 use dotenv::dotenv;
 use log::info;
