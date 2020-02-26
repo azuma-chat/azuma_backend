@@ -19,12 +19,16 @@ pub fn api() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone
 
     let protected = any()
         .and(path!("protected"))
-        .and(session::session_middleware())
+        .and(session::with_session())
         .map(|session| {
-            reply::json(&ApiVersion {
-                version: env!("CARGO_PKG_VERSION"),
-            })
-        });
+            (
+                reply::json(&ApiVersion {
+                    version: env!("CARGO_PKG_VERSION"),
+                }),
+                session,
+            )
+        })
+        .and_then(session::update_session);
 
     any()
         .and(api.and(api_version.or(protected)))
