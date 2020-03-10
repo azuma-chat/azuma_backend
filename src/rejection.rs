@@ -5,6 +5,7 @@ use warp::{http::StatusCode, reject, reply, Rejection, Reply};
 #[derive(Debug)]
 pub enum AzumaRejection {
     InternalServerError,
+    NotFound,
     Unauthorized,
 }
 
@@ -25,6 +26,9 @@ pub async fn handle_rejection(rej: Rejection) -> Result<impl Reply, Infallible> 
     } else if let Some(AzumaRejection::InternalServerError) = rej.find() {
         code = StatusCode::INTERNAL_SERVER_ERROR;
         message = "INTERNAL_SERVER_ERROR";
+    } else if let Some(AzumaRejection::NotFound) = rej.find() {
+        code = StatusCode::NOT_FOUND;
+        message = "NOT_FOUND";
     } else if let Some(AzumaRejection::Unauthorized) = rej.find() {
         code = StatusCode::UNAUTHORIZED;
         message = "UNAUTHORIZED";

@@ -1,7 +1,7 @@
-use crate::{rejection, user::session};
+use crate::{rejection, user::login, user::session};
 use serde::Serialize;
 use std::convert::Infallible;
-use warp::{any, path, reply, Filter, Reply};
+use warp::{any, body, path, post, reply, Filter, Reply};
 
 #[derive(Serialize)]
 pub struct ApiVersion {
@@ -30,7 +30,12 @@ pub fn api() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone
         })
         .and_then(session::update_session);
 
+    let login_route = post()
+        .and(path!("login"))
+        .and(body::json())
+        .and_then(login::login_handler);
+
     any()
-        .and(api.and(api_version.or(protected)))
+        .and(api.and(api_version.or(protected).or(login_route)))
         .recover(rejection::handle_rejection)
 }

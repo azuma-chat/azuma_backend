@@ -7,11 +7,11 @@ use dotenv::dotenv;
 use lazy_static::lazy_static;
 use log::info;
 use mongodb::{Client, Database};
-use std::env;
+use std::{env, net::SocketAddr};
 use tokio::{signal, sync::oneshot, task};
 
 lazy_static! {
-    static ref AZUMADB: Database = {
+    static ref AZUMA_DB: Database = {
         let db_client = Client::with_uri_str(
             &env::var("AZUMA_MONGODB").expect("Environment variable AZUMA_MONGODB not found"),
         )
@@ -27,11 +27,14 @@ async fn main() {
     pretty_env_logger::init();
     dotenv().ok();
 
+    let listen_addr: SocketAddr = env::var("AZUMA_HOST")
+        .expect("Environment variable AZUMA_HOST not found")
+        .parse()
+        .expect("Couldn't parse AZUMA_HOST");
     let (tx, rx) = oneshot::channel();
-    let (addr, server) =
-        warp::serve(api::api()).bind_with_graceful_shutdown(([127, 0, 0, 1], 7373), async {
-            rx.await.ok();
-        });
+    let (addr, server) = warp::serve(api::api()).bind_with_graceful_shutdown(listen_addr, async {
+        rx.await.ok();
+    });
     task::spawn(server);
     info!("Listening on {}", addr);
 

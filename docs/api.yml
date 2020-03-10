@@ -9,11 +9,11 @@ info:
   version: 0.1.0
 
 servers:
-  - url: https://azuma.rmcprod.me/api
+  - url: https://azuma.rmcprod.me/
     description: Azuma Instance hosted by RMC
 
 paths:
-  /:
+  /api/:
     get:
       summary: API Version
       description: Returns the API version.
