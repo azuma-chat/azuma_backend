@@ -14,6 +14,6 @@ pub async fn login_handler(user: LoginCredentials) -> Result<impl Reply, Rejecti
             },
             Err(_) => Err(reject::custom(AzumaRejection::Unauthorized)),
         },
-        Err(_) => Err(reject::custom(AzumaRejection::Unauthorized)),
+        Err(why) => Err(reject::custom(why)),
     }
 }

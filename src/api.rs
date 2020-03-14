@@ -1,6 +1,6 @@
 use crate::{
     rejection,
-    user::{login, session, user},
+    user::{login, registration, session, user},
 };
 use serde::Serialize;
 use std::convert::Infallible;
@@ -26,13 +26,18 @@ pub fn api() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone
         .and(body::json())
         .and_then(login::login_handler);
 
+    let registration_route = post()
+        .and(path!("register"))
+        .and(body::json())
+        .and_then(registration::registration_handler);
+
     let me_route = get()
         .and(path!("me"))
         .and(session::with_session())
         .and_then(user::me)
         .and_then(session::update_session);
 
-    let user_routes = login_route.or(me_route);
+    let user_routes = login_route.or(registration_route.or(me_route));
 
     any()
         .and(api.and(api_version.or(user_routes)))

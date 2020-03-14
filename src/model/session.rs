@@ -1,5 +1,5 @@
 use crate::{rejection::AzumaRejection, AZUMA_DB};
-use bson::{bson, doc, from_bson, to_bson, Bson::Document};
+use bson::{bson, doc, from_bson, oid::ObjectId, to_bson, Bson::Document};
 use chrono::{DateTime, Duration, Utc};
 use rsgen::{gen_random_string, OutputCharsType};
 use serde::{Deserialize, Serialize};
@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize)]
 pub struct Session {
     pub token: String,
-    pub userid: i64,
+    pub userid: ObjectId,
     pub expiration: DateTime<Utc>,
     #[serde(skip)]
     pub location: Option<SessionLocation>,
@@ -20,7 +20,7 @@ pub enum SessionLocation {
 }
 
 impl Session {
-    pub fn new(userid: i64) -> Result<Session, AzumaRejection> {
+    pub fn new(userid: ObjectId) -> Result<Session, AzumaRejection> {
         let token = gen_random_string(
             64,
             OutputCharsType::LatinAlphabetAndNumeric {
@@ -58,7 +58,7 @@ impl Session {
                             Err(AzumaRejection::Unauthorized)
                         }
                     }
-                    Err(_) => Err(AzumaRejection::Unauthorized),
+                    Err(_) => Err(AzumaRejection::InternalServerError),
                 },
                 None => Err(AzumaRejection::Unauthorized),
             },

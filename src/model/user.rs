@@ -1,10 +1,12 @@
 use crate::{rejection::AzumaRejection, AZUMA_DB};
-use bson::{bson, doc, from_bson, Bson::Document};
+use bson::{bson, doc, from_bson, oid::ObjectId, to_bson, Bson::Document};
+use pbkdf2::pbkdf2_simple;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
 pub struct User {
-    pub id: i64,
+    #[serde(rename = "_id")]
+    pub id: ObjectId,
     pub name: String,
     pub password: String,
     pub icon: Option<String>,
@@ -12,13 +14,43 @@ pub struct User {
 }
 
 impl User {
+    pub fn new(name: String, password: String) -> Result<User, AzumaRejection> {
+        let coll = AZUMA_DB.collection("users");
+        match coll.find_one(Some(doc! { "name": name.clone() }), None) {
+            Ok(doc) => match doc {
+                None => match pbkdf2_simple(&password, 100000) {
+                    Ok(hashed_password) => {
+                        let user = User {
+                            id: ObjectId::new().unwrap(),
+                            name,
+                            password: hashed_password,
+                            icon: None,
+                            status: None,
+                        };
+
+                        match coll.insert_one(
+                            to_bson(&user).unwrap().as_document().unwrap().clone(),
+                            None,
+                        ) {
+                            Ok(_) => Ok(user),
+                            Err(_) => Err(AzumaRejection::InternalServerError),
+                        }
+                    }
+                    Err(_) => Err(AzumaRejection::InternalServerError),
+                },
+                Some(_) => Err(AzumaRejection::AlreadyExists),
+            },
+            Err(_) => Err(AzumaRejection::InternalServerError),
+        }
+    }
+
     pub fn get(name: String) -> Result<User, AzumaRejection> {
         let coll = AZUMA_DB.collection("users");
         match coll.find_one(Some(doc! { "name": name }), None) {
             Ok(doc) => match doc {
                 Some(doc) => match from_bson::<User>(Document(doc)) {
                     Ok(user_result) => Ok(user_result),
-                    Err(_) => Err(AzumaRejection::Unauthorized),
+                    Err(_) => Err(AzumaRejection::InternalServerError),
                 },
                 None => Err(AzumaRejection::NotFound),
             },
@@ -26,13 +58,13 @@ impl User {
         }
     }
 
-    pub fn get_by_id(id: i64) -> Result<User, AzumaRejection> {
+    pub fn get_by_id(id: ObjectId) -> Result<User, AzumaRejection> {
         let coll = AZUMA_DB.collection("users");
-        match coll.find_one(Some(doc! { "id": id }), None) {
+        match coll.find_one(Some(doc! { "_id": id }), None) {
             Ok(doc) => match doc {
                 Some(doc) => match from_bson::<User>(Document(doc)) {
                     Ok(user_result) => Ok(user_result),
-                    Err(_) => Err(AzumaRejection::Unauthorized),
+                    Err(_) => Err(AzumaRejection::InternalServerError),
                 },
                 None => Err(AzumaRejection::NotFound),
             },

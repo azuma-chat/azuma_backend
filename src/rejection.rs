@@ -4,6 +4,7 @@ use warp::{http::StatusCode, reject, reply, Rejection, Reply};
 
 #[derive(Debug)]
 pub enum AzumaRejection {
+    AlreadyExists,
     InternalServerError,
     NotFound,
     Unauthorized,
@@ -23,6 +24,9 @@ pub async fn handle_rejection(rej: Rejection) -> Result<impl Reply, Infallible> 
     if rej.is_not_found() {
         code = StatusCode::NOT_FOUND;
         message = "NOT_FOUND";
+    } else if let Some(AzumaRejection::AlreadyExists) = rej.find() {
+        code = StatusCode::BAD_REQUEST;
+        message = "ALREADY_EXISTS";
     } else if let Some(AzumaRejection::InternalServerError) = rej.find() {
         code = StatusCode::INTERNAL_SERVER_ERROR;
         message = "INTERNAL_SERVER_ERROR";

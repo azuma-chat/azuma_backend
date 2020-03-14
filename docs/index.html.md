@@ -72,9 +72,11 @@ This endpoint is used to get the API version.
 
 ```json
 {
-    "token": "2tKMuDkWYpz78OVkiEJ5GJDc6EVnUjbgPebney7fdEs2J4daTDzekEoDsU2G9u3B",
-    "userid": 1,
-    "expiration": "2020-04-11T21:48:25.939393900Z"
+  "token": "vmcG6sPriniFUvFcyIKNI1kjyW4NIErHrByovYbZ7HQWMBCh0Y19tgge43dmISgb",
+  "userid": {
+    "$oid": "5e626bd89158f3ecad052a8e"
+  },
+  "expiration": "2020-04-13T18:56:20.055234Z"
 }
 ```
 
@@ -84,16 +86,47 @@ This endpoint is used to get an authentication token.
 
 `POST /api/login`
 
+## Registration
+
+> Request:
+
+```json
+{
+    "name": "user2",
+    "password": "user2"
+}
+```
+
+> Response:
+
+```json
+{
+  "token": "Fih77K6t3EsMBS85Rv6VyxC9nVaSLOMCC6MOfwbcZ7bRzSve9GeKnRv0vrkn2yCv",
+  "userid": {
+    "$oid": "5e6d28b700c49dba00213a92"
+  },
+  "expiration": "2020-04-13T18:55:51.094616900Z"
+}
+```
+
+This endpoint is used to create a user and get an authentication token for the created user.
+
+### HTTP Request
+
+`POST /api/register`
+
 ## Me
 
 > Response:
 
 ```json
 {
-    "id": 1,
-    "name": "user1",
-    "icon": "icon.url.here",
-    "status": "I'm stuff"
+  "_id": {
+    "$oid": "5e626bd89158f3ecad052a8e"
+  },
+  "name": "user1",
+  "icon": "icon.here",
+  "status": "I'm stuff"
 }
 ```
 
