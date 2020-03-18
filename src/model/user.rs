@@ -2,6 +2,7 @@ use crate::{rejection::AzumaRejection, AZUMA_DB};
 use bson::{bson, doc, from_bson, oid::ObjectId, to_bson, Bson::Document};
 use pbkdf2::pbkdf2_simple;
 use serde::{Deserialize, Serialize};
+use super::permission::UserPermission;
 
 #[derive(Deserialize, Serialize)]
 pub struct User {
@@ -11,6 +12,7 @@ pub struct User {
     pub password: String,
     pub icon: Option<String>,
     pub status: Option<String>,
+    pub permissions: UserPermission,
 }
 
 impl User {
@@ -26,6 +28,7 @@ impl User {
                             password: hashed_password,
                             icon: None,
                             status: None,
+                            permissions: UserPermission::default(),
                         };
 
                         match coll.insert_one(

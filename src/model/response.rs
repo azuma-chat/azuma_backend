@@ -1,4 +1,4 @@
-use crate::model::user::User;
+use crate::model::{user::User, permission::UserPermission};
 use bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 
@@ -9,6 +9,7 @@ pub struct UserResponse {
     pub name: String,
     pub icon: Option<String>,
     pub status: Option<String>,
+    pub permissions: UserPermission,
 }
 
 impl UserResponse {
@@ -18,6 +19,7 @@ impl UserResponse {
             name: user.name,
             icon: user.icon,
             status: user.status,
+            permissions: user.permissions,
         }
     }
 }
