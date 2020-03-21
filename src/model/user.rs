@@ -1,5 +1,5 @@
-use crate::{rejection::AzumaRejection, AZUMA_DB};
-use bson::{bson, doc, from_bson, oid::ObjectId, to_bson, Bson::Document};
+use crate::{rejection::AzumaRejection, util::to_document::to_doc, AZUMA_DB};
+use bson::{doc, from_bson, oid::ObjectId, Bson::Document};
 use pbkdf2::pbkdf2_simple;
 use serde::{Deserialize, Serialize};
 
@@ -28,10 +28,7 @@ impl User {
                             status: None,
                         };
 
-                        match coll.insert_one(
-                            to_bson(&user).unwrap().as_document().unwrap().clone(),
-                            None,
-                        ) {
+                        match coll.insert_one(to_doc(&user), None) {
                             Ok(_) => Ok(user),
                             Err(_) => Err(AzumaRejection::InternalServerError),
                         }

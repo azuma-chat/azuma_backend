@@ -2,6 +2,7 @@ mod api;
 mod model;
 mod rejection;
 mod user;
+mod util;
 
 use dotenv::dotenv;
 use lazy_static::lazy_static;

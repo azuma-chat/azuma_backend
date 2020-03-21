@@ -1,5 +1,5 @@
-use crate::{rejection::AzumaRejection, AZUMA_DB};
-use bson::{bson, doc, from_bson, oid::ObjectId, to_bson, Bson::Document};
+use crate::{rejection::AzumaRejection, util::to_document::to_doc, AZUMA_DB};
+use bson::{doc, from_bson, oid::ObjectId, Bson::Document};
 use chrono::{DateTime, Duration, Utc};
 use rsgen::{gen_random_string, OutputCharsType};
 use serde::{Deserialize, Serialize};
@@ -37,10 +37,7 @@ impl Session {
         };
 
         let coll = AZUMA_DB.collection("sessions");
-        match coll.insert_one(
-            to_bson(&session).unwrap().as_document().unwrap().clone(),
-            None,
-        ) {
+        match coll.insert_one(to_doc(&session), None) {
             Ok(_) => Ok(session),
             Err(_) => Err(AzumaRejection::InternalServerError),
         }

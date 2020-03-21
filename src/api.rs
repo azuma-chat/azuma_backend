@@ -34,7 +34,7 @@ pub fn api() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone
     let me_route = get()
         .and(path!("me"))
         .and(session::with_session())
-        .and_then(user::me)
+        .and_then(user::me_handler)
         .and_then(session::update_session);
 
     let user_routes = login_route.or(registration_route.or(me_route));
