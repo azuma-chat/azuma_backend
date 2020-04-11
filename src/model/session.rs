@@ -9,14 +9,6 @@ pub struct Session {
     pub token: String,
     pub userid: ObjectId,
     pub expiration: DateTime<Utc>,
-    #[serde(skip)]
-    pub location: Option<SessionLocation>,
-}
-
-#[derive(Deserialize, Serialize)]
-pub enum SessionLocation {
-    Cookie,
-    Header,
 }
 
 impl Session {
@@ -33,7 +25,6 @@ impl Session {
             token,
             userid,
             expiration: (Utc::now() + Duration::days(30)),
-            location: None,
         };
 
         let coll = AZUMA_DB.collection("sessions");
@@ -61,10 +52,5 @@ impl Session {
             },
             Err(_) => Err(AzumaRejection::InternalServerError),
         }
-    }
-
-    pub fn set_location(mut self, location: SessionLocation) -> Self {
-        self.location = Some(location);
-        self
     }
 }

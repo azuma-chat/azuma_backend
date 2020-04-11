@@ -10,31 +10,20 @@ Welcome to the Azuma API! With the Azuma API, you can interact with the Azuma Ch
 
 # Authentication
 
-> When using header authentication, which is usually not automatically handled by request clients, use it like this:
+> You can authorize like this:
 
 ```shell
 curl "AZUMA_HOST"
-    -H "Azuma-Session: TOKEN"
+    -H "Authorization: Bearer TOKEN"
 ```
 
-There are two ways to authenticate:
-
-* By cookie: A cookie with the token is sent with every request
-* By header: A header with the token is sent with every request
-
-If you're using cookie authentication, a cookie with the key `azuma_session` and the authentication token as value should be sent with every request.
-
-If you're using header authentication, the `Azuma-Session`-Header with the authentication token as value should be sent with every request.
+Azuma uses Bearer authentication. To authorize, send the `Authentication`-Header with every request.
 
 ## Token Refresh
-When the current authentication token is gonna expire in the next 7 days, Azuma automatically issues a new one.
-How this token is returned is based on the request:
-
-* If cookie authentication was used in the request, Azuma is gonna reply with a `Set-Cookie`-Header, which is automatically gonna set the cookie to the new token.
-* If header authentication was used in the request, the reply will contain the `Azuma-Session`-Header with a new token.
+When the current authentication token is gonna expire in the next 7 days, Azuma automatically issues a new one. The reply will contain the `Authorization`-Header with a new token.
 
 <aside class="notice">
-When using header authentication, make sure to check every response for the <code>Azuma-Session</code>-Header.
+Make sure to check every response for the <code>Authorization</code>-Header.
 </aside>
 
 # API
