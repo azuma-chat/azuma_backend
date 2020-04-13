@@ -1,0 +1,153 @@
+---
+openapi: 3.0.3
+info:
+  title: Azuma API
+  version: 0.0.0
+  description:
+    Welcome to the Azuma API! With the Azuma API, you can interact with the Azuma Chat Service - for example,
+    you can create your own client.
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+
+paths:
+  "/api/":
+    get:
+      summary: Returns the API version
+      tags:
+        - API
+      responses:
+        "200":
+          description: An API object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/API"
+              example:
+                version: 0.0.0
+
+  "/api/login":
+    post:
+      summary: Get a new user session
+      tags:
+        - User
+      requestBody:
+        description: User to get a session for
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginCredentials"
+            example:
+              name: user1
+              password: user1
+      responses:
+        "200":
+          description: A user session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+              example:
+                token: vmcG6sPriniFUvFcyIKNI1kjyW4NIErHrByovYbZ7HQWMBCh0Y19tgge43dmISgb
+                userid:
+                  $oid: 5e626bd89158f3ecad052a8e
+                expiration: "2020-04-13T18:56:20.055234Z"
+
+  "/api/register":
+    post:
+      summary: Create a new user and get a session for the user
+      tags:
+        - User
+      requestBody:
+        description: User to create and get a session for
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginCredentials"
+            example:
+              name: user2
+              password: user2
+      responses:
+        "200":
+          description: A user session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+              example:
+                token: Fih77K6t3EsMBS85Rv6VyxC9nVaSLOMCC6MOfwbcZ7bRzSve9GeKnRv0vrkn2yCv
+                userid:
+                  $oid: 5e6d28b700c49dba00213a92
+                expiration: "2020-04-13T18:55:51.094616900Z"
+
+  "/api/me":
+    get:
+      summary: Get information about the current user
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: A user object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+              example:
+                _id:
+                  $oid: 5e626bd89158f3ecad052a8e
+                name: user1
+                icon: icon.here
+                status: I'm stuff
+
+components:
+  schemas:
+    API:
+      type: object
+      properties:
+        version:
+          type: string
+
+    LoginCredentials:
+      type: object
+      properties:
+        name:
+          type: string
+        password:
+          type: string
+
+    Session:
+      type: object
+      properties:
+        token:
+          type: string
+        userid:
+          type: object
+          properties:
+            $oid:
+              type: string
+        expiration:
+          type: string
+
+    User:
+      type: object
+      properties:
+        _id:
+          type: object
+          properties:
+            $oid:
+              type: string
+        name:
+          type: string
+        icon:
+          type: string
+        status:
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
