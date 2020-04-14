@@ -17,5 +17,5 @@ pbkdf2 = "0.3"
 pretty_env_logger = "0.3"
 rsgen = "0.2"
 serde = { version = "^1.0", features = ["derive"] }
-tokio = { version = "0.2", features = ["macros", "signal", "sync"] }
+tokio = { version = "0.2", features = ["macros", "signal", "stream", "sync"] }
 warp = "0.2"

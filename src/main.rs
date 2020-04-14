@@ -10,6 +10,11 @@ use log::info;
 use mongodb::{Client, Database};
 use std::{env, net::SocketAddr};
 use tokio::{signal, sync::oneshot, task};
+#[cfg(unix)]
+use tokio::{
+    signal::unix::{self, SignalKind},
+    stream::StreamExt,
+};
 
 lazy_static! {
     static ref AZUMA_DB: Database = {
@@ -39,8 +44,18 @@ async fn main() {
     task::spawn(server);
     info!("Listening on {}", addr);
 
+    #[cfg(not(unix))]
     signal::ctrl_c()
         .await
         .expect("Couldn't listen to CTRL-C signal");
+    #[cfg(unix)]
+    {
+        let sigint =
+            unix::signal(SignalKind::interrupt()).expect("Couldn't listen to sigint signal");
+        let sigterm =
+            unix::signal(SignalKind::terminate()).expect("Couldn't listen to sigterm signal");
+        let mut shutdown_signal = sigint.merge(sigterm);
+        shutdown_signal.next().await;
+    }
     let _ = tx.send(());
 }
