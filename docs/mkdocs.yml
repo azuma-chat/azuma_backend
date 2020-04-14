@@ -1,0 +1,15 @@
+site_name: Azuma API Documentation
+site_description: Azuma API Documentation
+
+theme:
+  name: material
+  language: en
+  palette:
+    primary: teal
+    accent: teal
+  logo: logo.svg
+  favicon: favicon.png
+
+markdown_extensions:
+  - admonition
+  - codehilite

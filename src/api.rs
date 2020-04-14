@@ -12,8 +12,6 @@ pub struct ApiVersion {
 }
 
 pub fn api() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
-    let api = path("api");
-
     let api_version = any().and(path::end()).map(|| {
         reply::json(&ApiVersion {
             version: env!("CARGO_PKG_VERSION"),
@@ -40,6 +38,6 @@ pub fn api() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone
     let user_routes = login_route.or(registration_route.or(me_route));
 
     any()
-        .and(api.and(api_version.or(user_routes)))
+        .and(api_version.or(user_routes))
         .recover(rejection::handle_rejection)
 }
