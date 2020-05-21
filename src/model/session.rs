@@ -1,4 +1,4 @@
-use crate::{rejection::AzumaRejection, util::to_document::to_doc, AZUMA_DB};
+use crate::{db::db, rejection::AzumaRejection, util::to_document::to_doc};
 use bson::{doc, from_bson, oid::ObjectId, Bson::Document};
 use chrono::{DateTime, Duration, Utc};
 use rsgen::{gen_random_string, OutputCharsType};
@@ -12,7 +12,7 @@ pub struct Session {
 }
 
 impl Session {
-    pub fn new(userid: ObjectId) -> Result<Session, AzumaRejection> {
+    pub async fn new(userid: ObjectId) -> Result<Session, AzumaRejection> {
         let token = gen_random_string(
             64,
             OutputCharsType::LatinAlphabetAndNumeric {
@@ -27,16 +27,16 @@ impl Session {
             expiration: (Utc::now() + Duration::days(30)),
         };
 
-        let coll = AZUMA_DB.collection("sessions");
-        match coll.insert_one(to_doc(&session), None) {
+        let coll = db().await.collection("sessions");
+        match coll.insert_one(to_doc(&session), None).await {
             Ok(_) => Ok(session),
             Err(_) => Err(AzumaRejection::InternalServerError),
         }
     }
 
-    pub fn get(token: String) -> Result<Session, AzumaRejection> {
-        let coll = AZUMA_DB.collection("sessions");
-        match coll.find_one(Some(doc! { "token": token }), None) {
+    pub async fn get(token: String) -> Result<Session, AzumaRejection> {
+        let coll = db().await.collection("sessions");
+        match coll.find_one(Some(doc! { "token": token }), None).await {
             Ok(doc) => match doc {
                 Some(doc) => match from_bson::<Session>(Document(doc)) {
                     Ok(session_result) => {

@@ -11,7 +11,7 @@ pub struct ApiVersion {
     pub version: &'static str,
 }
 
-pub fn api() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
+pub async fn api() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
     let api_version = any().and(path::end()).map(|| {
         reply::json(&ApiVersion {
             version: env!("CARGO_PKG_VERSION"),
@@ -31,7 +31,7 @@ pub fn api() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone
 
     let me_route = get()
         .and(path!("me"))
-        .and(session::with_session())
+        .and(session::with_session().await)
         .and_then(user::me_handler)
         .and_then(session::update_session);
 

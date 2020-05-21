@@ -1,4 +1,4 @@
-use crate::{rejection::AzumaRejection, util::to_document::to_doc, AZUMA_DB};
+use crate::{db::db, rejection::AzumaRejection, util::to_document::to_doc};
 use bson::{doc, from_bson, oid::ObjectId, Bson::Document};
 use pbkdf2::pbkdf2_simple;
 use serde::{Deserialize, Serialize};
@@ -14,9 +14,12 @@ pub struct User {
 }
 
 impl User {
-    pub fn new(name: String, password: String) -> Result<User, AzumaRejection> {
-        let coll = AZUMA_DB.collection("users");
-        match coll.find_one(Some(doc! { "name": name.clone() }), None) {
+    pub async fn new(name: String, password: String) -> Result<User, AzumaRejection> {
+        let coll = db().await.collection("users");
+        match coll
+            .find_one(Some(doc! { "name": name.clone() }), None)
+            .await
+        {
             Ok(doc) => match doc {
                 None => match pbkdf2_simple(&password, 100000) {
                     Ok(hashed_password) => {
@@ -28,7 +31,7 @@ impl User {
                             status: None,
                         };
 
-                        match coll.insert_one(to_doc(&user), None) {
+                        match coll.insert_one(to_doc(&user), None).await {
                             Ok(_) => Ok(user),
                             Err(_) => Err(AzumaRejection::InternalServerError),
                         }
@@ -41,9 +44,9 @@ impl User {
         }
     }
 
-    pub fn get(name: String) -> Result<User, AzumaRejection> {
-        let coll = AZUMA_DB.collection("users");
-        match coll.find_one(Some(doc! { "name": name }), None) {
+    pub async fn get(name: String) -> Result<User, AzumaRejection> {
+        let coll = db().await.collection("users");
+        match coll.find_one(Some(doc! { "name": name }), None).await {
             Ok(doc) => match doc {
                 Some(doc) => match from_bson::<User>(Document(doc)) {
                     Ok(user_result) => Ok(user_result),
@@ -55,9 +58,9 @@ impl User {
         }
     }
 
-    pub fn get_by_id(id: ObjectId) -> Result<User, AzumaRejection> {
-        let coll = AZUMA_DB.collection("users");
-        match coll.find_one(Some(doc! { "_id": id }), None) {
+    pub async fn get_by_id(id: ObjectId) -> Result<User, AzumaRejection> {
+        let coll = db().await.collection("users");
+        match coll.find_one(Some(doc! { "_id": id }), None).await {
             Ok(doc) => match doc {
                 Some(doc) => match from_bson::<User>(Document(doc)) {
                     Ok(user_result) => Ok(user_result),

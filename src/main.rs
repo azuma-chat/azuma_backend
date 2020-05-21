@@ -1,13 +1,12 @@
 mod api;
+mod db;
 mod model;
 mod rejection;
 mod user;
 mod util;
 
 use dotenv::dotenv;
-use lazy_static::lazy_static;
 use log::info;
-use mongodb::{Client, Database};
 use std::{env, net::SocketAddr};
 use tokio::{signal, sync::oneshot, task};
 #[cfg(unix)]
@@ -15,18 +14,6 @@ use tokio::{
     signal::unix::{self, SignalKind},
     stream::StreamExt,
 };
-
-lazy_static! {
-    static ref AZUMA_DB: Database = {
-        let db_client = Client::with_uri_str(
-            &env::var("AZUMA_MONGODB").expect("Environment variable AZUMA_MONGODB not found"),
-        )
-        .expect("Error creating MongoDB client");
-        db_client.database(
-            &env::var("AZUMA_DBNAME").expect("Environment variable AZUMA_DBNAME not found"),
-        )
-    };
-}
 
 #[tokio::main]
 async fn main() {
@@ -38,9 +25,10 @@ async fn main() {
         .parse()
         .expect("Couldn't parse AZUMA_HOST");
     let (tx, rx) = oneshot::channel();
-    let (addr, server) = warp::serve(api::api()).bind_with_graceful_shutdown(listen_addr, async {
-        rx.await.ok();
-    });
+    let (addr, server) =
+        warp::serve(api::api().await).bind_with_graceful_shutdown(listen_addr, async {
+            rx.await.ok();
+        });
     task::spawn(server);
     info!("Listening on {}", addr);
 

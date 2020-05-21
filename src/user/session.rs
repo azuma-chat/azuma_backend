@@ -2,12 +2,12 @@ use crate::{model::session::Session, rejection::AzumaRejection};
 use chrono::{Duration, Utc};
 use warp::{header, http::Response, reject, Filter, Rejection, Reply};
 
-pub fn with_session() -> impl Filter<Extract = (Session,), Error = Rejection> + Clone {
+pub async fn with_session() -> impl Filter<Extract = (Session,), Error = Rejection> + Clone {
     header::header("Authorization")
         .and_then(|mut authentication_header: String| async move {
             let authentication_token = authentication_header.split_off(7);
             if authentication_header == "Bearer " {
-                match Session::get(authentication_token) {
+                match Session::get(authentication_token).await {
                     Ok(session) => Ok(session),
                     Err(why) => Err(reject::custom(why)),
                 }
@@ -23,7 +23,7 @@ pub async fn update_session(forwarded: (impl Reply, Session)) -> Result<impl Rep
 
     let session = forwarded.1;
     if session.expiration < (Utc::now() + Duration::days(7)) {
-        match Session::new(session.userid) {
+        match Session::new(session.userid).await {
             Ok(new_session) => {
                 response =
                     response.header("Authorization", format!("Bearer {}", new_session.token));
