@@ -1,12 +1,8 @@
 use crate::model::{request::LoginCredentials, session::Session, user::User};
-use warp::{reject, reply, Rejection, Reply};
+use warp::{reply, Rejection, Reply};
 
 pub async fn registration_handler(user: LoginCredentials) -> Result<impl Reply, Rejection> {
-    match User::new(user.name, user.password).await {
-        Ok(new_user) => match Session::new(new_user.id).await {
-            Ok(session) => Ok(reply::json(&session)),
-            Err(why) => Err(reject::custom(why)),
-        },
-        Err(why) => Err(reject::custom(why)),
-    }
+    let new_user = User::new(user.name, user.password).await?;
+    let session = Session::new(new_user.id).await?;
+    Ok(reply::json(&session))
 }

@@ -23,13 +23,8 @@ pub async fn update_session(forwarded: (impl Reply, Session)) -> Result<impl Rep
 
     let session = forwarded.1;
     if session.expiration < (Utc::now() + Duration::days(7)) {
-        match Session::new(session.userid).await {
-            Ok(new_session) => {
-                response =
-                    response.header("Authorization", format!("Bearer {}", new_session.token));
-            }
-            Err(why) => return Err(reject::custom(why)),
-        }
+        let new_session = Session::new(session.userid).await?;
+        response = response.header("Authorization", format!("Bearer {}", new_session.token));
     }
 
     let original_response = forwarded.0.into_response();

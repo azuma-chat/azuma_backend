@@ -8,12 +8,14 @@ mod util;
 use dotenv::dotenv;
 use log::info;
 use std::{env, net::SocketAddr};
-use tokio::{signal, sync::oneshot, task};
+#[cfg(not(unix))]
+use tokio::signal;
 #[cfg(unix)]
 use tokio::{
     signal::unix::{self, SignalKind},
     stream::StreamExt,
 };
+use tokio::{sync::oneshot, task};
 
 #[tokio::main]
 async fn main() {

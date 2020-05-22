@@ -1,5 +1,7 @@
+use bson::DecoderError;
+use mongodb::error::Error as MongoError;
 use serde::Serialize;
-use std::convert::Infallible;
+use std::{convert::Infallible, io::Error as IoError};
 use warp::{http::StatusCode, reject, reply, Rejection, Reply};
 
 #[derive(Debug)]
@@ -11,6 +13,30 @@ pub enum AzumaRejection {
 }
 
 impl reject::Reject for AzumaRejection {}
+
+impl From<DecoderError> for AzumaRejection {
+    fn from(_error: DecoderError) -> Self {
+        AzumaRejection::InternalServerError
+    }
+}
+
+impl From<IoError> for AzumaRejection {
+    fn from(_error: IoError) -> Self {
+        AzumaRejection::InternalServerError
+    }
+}
+
+impl From<MongoError> for AzumaRejection {
+    fn from(_error: MongoError) -> Self {
+        AzumaRejection::InternalServerError
+    }
+}
+
+impl From<AzumaRejection> for Rejection {
+    fn from(rejection: AzumaRejection) -> Self {
+        reject::custom(rejection)
+    }
+}
 
 #[derive(Serialize)]
 pub struct RejectionMessage {
