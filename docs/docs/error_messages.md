@@ -5,7 +5,7 @@ Errors are returned with a 4XX or 5XX code and the following format:
 ```json
 {
     "code": 418,
-    "status": "IM_A_TEAPOT"
+    "message": "IM_A_TEAPOT"
 }
 ```
 
@@ -18,7 +18,7 @@ This error occurs when you try to access something that doesn't exist.
 ```json
 {
     "code": 404,
-    "status": "NOT_FOUND"
+    "message": "NOT_FOUND"
 }
 ```
 
@@ -29,7 +29,7 @@ This error occurs when you try to create something that already exists.
 ```json
 {
     "code": 400,
-    "status": "ALREADY_EXISTS"
+    "message": "ALREADY_EXISTS"
 }
 ```
 
@@ -40,7 +40,7 @@ This error occurs when something in the backend goes wrong. Try contacting the p
 ```json
 {
     "code": 500,
-    "status": "INTERNAL_SERVER_ERROR"
+    "message": "INTERNAL_SERVER_ERROR"
 }
 ```
 
@@ -51,7 +51,7 @@ This error occurs when you try to access something that you aren't authorized to
 ```json
 {
     "code": 401,
-    "status": "UNAUTHORIZED"
+    "message": "UNAUTHORIZED"
 }
 ```
 
@@ -62,6 +62,6 @@ This error occurs when the backend wasn't able to categorise an error. Please cr
 ```json
 {
     "code": 500,
-    "status": "UNHANDLED_REJECTION"
+    "message": "UNHANDLED_REJECTION"
 }
 ```
