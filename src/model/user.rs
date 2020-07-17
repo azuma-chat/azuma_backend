@@ -1,5 +1,8 @@
-use crate::{db::db, rejection::AzumaRejection, util::to_document::to_doc};
-use mongodb::bson::{doc, from_bson, oid::ObjectId, Bson::Document};
+use crate::{rejection::AzumaRejection, util::to_document::to_doc};
+use mongodb::{
+    bson::{doc, from_bson, oid::ObjectId, Bson::Document},
+    Database,
+};
 use pbkdf2::pbkdf2_simple;
 use serde::{Deserialize, Serialize};
 
@@ -14,8 +17,12 @@ pub struct User {
 }
 
 impl User {
-    pub async fn new(name: String, password: String) -> Result<User, AzumaRejection> {
-        let coll = db().await.collection("users");
+    pub async fn new(
+        name: String,
+        password: String,
+        db: &Database,
+    ) -> Result<User, AzumaRejection> {
+        let coll = db.collection("users");
         let user = coll
             .find_one(Some(doc! { "name": name.clone() }), None)
             .await?;
@@ -36,8 +43,8 @@ impl User {
         }
     }
 
-    pub async fn get(name: String) -> Result<User, AzumaRejection> {
-        let coll = db().await.collection("users");
+    pub async fn get(name: String, db: &Database) -> Result<User, AzumaRejection> {
+        let coll = db.collection("users");
         let user = coll.find_one(Some(doc! { "name": name }), None).await?;
         match user {
             Some(user) => {
@@ -48,8 +55,8 @@ impl User {
         }
     }
 
-    pub async fn get_by_id(id: ObjectId) -> Result<User, AzumaRejection> {
-        let coll = db().await.collection("users");
+    pub async fn get_by_id(id: ObjectId, db: &Database) -> Result<User, AzumaRejection> {
+        let coll = db.collection("users");
         let user = coll.find_one(Some(doc! { "_id": id }), None).await?;
         match user {
             Some(user) => {

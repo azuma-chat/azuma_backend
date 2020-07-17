@@ -1,6 +1,7 @@
-use crate::{db::db, rejection::AzumaRejection, util::to_document::to_doc};
+use crate::{rejection::AzumaRejection, util::to_document::to_doc};
 use chrono::{DateTime, Duration, Utc};
 use mongodb::bson::{doc, from_bson, oid::ObjectId, Bson::Document};
+use mongodb::Database;
 use rsgen::{gen_random_string, OutputCharsType};
 use serde::{Deserialize, Serialize};
 
@@ -12,7 +13,7 @@ pub struct Session {
 }
 
 impl Session {
-    pub async fn new(userid: ObjectId) -> Result<Session, AzumaRejection> {
+    pub async fn new(userid: ObjectId, db: &Database) -> Result<Session, AzumaRejection> {
         let token = gen_random_string(
             64,
             OutputCharsType::LatinAlphabetAndNumeric {
@@ -27,13 +28,13 @@ impl Session {
             expiration: (Utc::now() + Duration::days(30)),
         };
 
-        let coll = db().await.collection("sessions");
+        let coll = db.collection("sessions");
         coll.insert_one(to_doc(&session), None).await?;
         Ok(session)
     }
 
-    pub async fn get(token: String) -> Result<Session, AzumaRejection> {
-        let coll = db().await.collection("sessions");
+    pub async fn get(token: String, db: &Database) -> Result<Session, AzumaRejection> {
+        let coll = db.collection("sessions");
         let session = coll.find_one(Some(doc! { "token": token }), None).await?;
         match session {
             Some(session) => {
