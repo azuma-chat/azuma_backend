@@ -21,7 +21,7 @@ impl User {
             .await?;
         match user {
             None => {
-                let hashed_password = pbkdf2_simple(&password, 100000)?;
+                let hashed_password = pbkdf2_simple(&password, 100000).expect("RNG error");
                 let user = User {
                     id: ObjectId::new(),
                     name,
