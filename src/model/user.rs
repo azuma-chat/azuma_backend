@@ -1,5 +1,5 @@
 use crate::{db::db, rejection::AzumaRejection, util::to_document::to_doc};
-use bson::{doc, from_bson, oid::ObjectId, Bson::Document};
+use mongodb::bson::{doc, from_bson, oid::ObjectId, Bson::Document};
 use pbkdf2::pbkdf2_simple;
 use serde::{Deserialize, Serialize};
 
@@ -23,7 +23,7 @@ impl User {
             None => {
                 let hashed_password = pbkdf2_simple(&password, 100000)?;
                 let user = User {
-                    id: ObjectId::new().unwrap(),
+                    id: ObjectId::new(),
                     name,
                     password: hashed_password,
                     icon: None,

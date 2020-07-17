@@ -1,5 +1,5 @@
 use crate::model::user::User;
-use bson::oid::ObjectId;
+use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
