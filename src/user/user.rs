@@ -1,11 +1,8 @@
 use crate::model::{response::UserResponse, session::Session, user::User};
-use mongodb::Database;
+use sqlx::PgPool;
 use warp::{reply, Rejection, Reply};
 
-pub async fn me_handler(
-    session: Session,
-    db: Database,
-) -> Result<(impl Reply, Session, Database), Rejection> {
-    let user = User::get_by_id(session.userid.clone(), &db).await?;
-    Ok((reply::json(&UserResponse::new(user)), session, db))
+pub async fn me_handler(session: Session, pool: PgPool) -> Result<(impl Reply,), Rejection> {
+    let user = User::get_by_id(session.userid, &pool).await?;
+    Ok((reply::json(&UserResponse::new(user)),))
 }

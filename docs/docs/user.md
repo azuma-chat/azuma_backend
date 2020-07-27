@@ -21,10 +21,9 @@ password | ✅ | The password of the user you want to log in.
 
 ```json
 {
+    "id": 1,
     "token": "vmcG6sPriniFUvFcyIKNI1kjyW4NIErHrByovYbZ7HQWMBCh0Y19tgge43dmISgb",
-    "userid": {
-        "$oid": "5e626bd89158f3ecad052a8e"
-    },
+    "userid": 1,
     "expiration": "2020-04-13T18:56:20.055234Z"
 }
 ```
@@ -50,10 +49,9 @@ password | ✅ | The password of the user you want to register.
 
 ```json
 {
+    "id": 1,
     "token": "Fih77K6t3EsMBS85Rv6VyxC9nVaSLOMCC6MOfwbcZ7bRzSve9GeKnRv0vrkn2yCv",
-    "userid": {
-        "$oid": "5e6d28b700c49dba00213a92"
-    },
+    "userid": 1,
     "expiration": "2020-04-13T18:55:51.094616900Z"
 }
 ```
@@ -74,9 +72,7 @@ GET /me
 
 ```json
 {
-    "_id": {
-        "$oid": "5e626bd89158f3ecad052a8e"
-    },
+    "_id": 1,
     "name": "user1",
     "icon": "icon.here",
     "status": "I'm stuff"

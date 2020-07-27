@@ -3,9 +3,8 @@ mod db;
 mod model;
 mod rejection;
 mod user;
-mod util;
 
-use crate::db::create_db;
+use crate::db::create_pool;
 use dotenv::dotenv;
 use log::info;
 use std::{env, net::SocketAddr};
@@ -22,7 +21,7 @@ use tokio::{sync::oneshot, task};
 async fn main() {
     pretty_env_logger::init();
     dotenv().ok();
-    let db = create_db().await;
+    let pool = create_pool().await;
 
     let listen_addr: SocketAddr = env::var("AZUMA_HOST")
         .expect("Environment variable AZUMA_HOST not found")
@@ -30,7 +29,7 @@ async fn main() {
         .expect("Couldn't parse AZUMA_HOST");
     let (tx, rx) = oneshot::channel();
     let (addr, server) =
-        warp::serve(api::api(db).await).bind_with_graceful_shutdown(listen_addr, async {
+        warp::serve(api::api(pool).await).bind_with_graceful_shutdown(listen_addr, async {
             rx.await.ok();
         });
     task::spawn(server);

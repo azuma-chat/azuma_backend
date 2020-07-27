@@ -11,14 +11,3 @@ Azuma uses Bearer authentication. To authorize, send the `Authorization`-Header 
 ```
 Authorization: Bearer TOKEN
 ```
-
-## Refresh Tokens
-
-When the current authentication token is gonna expire in the next 7 days, Azuma automatically issues a new one. The reply will contain the Authorization-Header with a new token:
-
-```
-Authorization: Bearer NEW_TOKEN
-```
-
-!!! warning
-    Make sure to check every response for the Authorization-Header.

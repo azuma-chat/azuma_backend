@@ -1,11 +1,9 @@
 use crate::model::user::User;
-use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
 pub struct UserResponse {
-    #[serde(rename = "_id")]
-    pub id: ObjectId,
+    pub id: i64,
     pub name: String,
     pub icon: Option<String>,
     pub status: Option<String>,

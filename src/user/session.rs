@@ -1,12 +1,11 @@
 use crate::{model::session::Session, rejection::AzumaRejection};
-use chrono::{Duration, Utc};
-use mongodb::Database;
-use warp::{header, http::Response, reject, Filter, Rejection, Reply};
+use sqlx::PgPool;
+use warp::{header, reject, Filter, Rejection};
 
-pub fn with_session(db: Database) -> impl Filter<Extract = (Session,), Error = Rejection> + Clone {
+pub fn with_session(pool: PgPool) -> impl Filter<Extract = (Session,), Error = Rejection> + Clone {
     header::header("Authorization")
         .and_then(move |mut authentication_header: String| {
-            let db = db.clone();
+            let db = pool.clone();
             async move {
                 let authentication_token = authentication_header.split_off(7);
                 if authentication_header == "Bearer " {
@@ -20,21 +19,4 @@ pub fn with_session(db: Database) -> impl Filter<Extract = (Session,), Error = R
             }
         })
         .or_else(|_| async move { Err(reject::custom(AzumaRejection::Unauthorized)) })
-}
-
-pub async fn update_session(
-    forwarded: (impl Reply, Session, Database),
-) -> Result<impl Reply, Rejection> {
-    let mut response = Response::builder();
-
-    let session = forwarded.1;
-    if session.expiration < (Utc::now() + Duration::days(7)) {
-        let new_session = Session::new(session.userid, &forwarded.2).await?;
-        response = response.header("Authorization", format!("Bearer {}", new_session.token));
-    }
-
-    let original_response = forwarded.0.into_response();
-    Ok(response
-        .status(original_response.status())
-        .body(original_response.into_body()))
 }

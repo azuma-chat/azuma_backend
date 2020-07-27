@@ -1,5 +1,5 @@
-use mongodb::{bson::de::Error as BsonDeError, error::Error as MongoError};
 use serde::Serialize;
+use sqlx::Error as SqlxError;
 use std::{convert::Infallible, io::Error as IoError};
 use warp::{http::StatusCode, reject, reply, Rejection, Reply};
 
@@ -13,21 +13,18 @@ pub enum AzumaRejection {
 
 impl reject::Reject for AzumaRejection {}
 
-impl From<BsonDeError> for AzumaRejection {
-    fn from(_error: BsonDeError) -> Self {
-        AzumaRejection::InternalServerError
-    }
-}
-
 impl From<IoError> for AzumaRejection {
     fn from(_error: IoError) -> Self {
         AzumaRejection::InternalServerError
     }
 }
 
-impl From<MongoError> for AzumaRejection {
-    fn from(_error: MongoError) -> Self {
-        AzumaRejection::InternalServerError
+impl From<SqlxError> for AzumaRejection {
+    fn from(error: SqlxError) -> Self {
+        match error {
+            SqlxError::RowNotFound => AzumaRejection::NotFound,
+            _ => AzumaRejection::InternalServerError,
+        }
     }
 }
 

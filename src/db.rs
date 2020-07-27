@@ -1,50 +1,25 @@
-use mongodb::{Client, Database};
+use sqlx::{
+    migrate,
+    postgres::{PgPool, PgPoolOptions},
+};
 use std::{convert::Infallible, env};
 use warp::{any, Filter};
 
-pub async fn create_db() -> Database {
-    let db_client = Client::with_uri_str(
-        &env::var("AZUMA_MONGODB").expect("Environment variable AZUMA_MONGODB not found"),
-    )
-    .await
-    .expect("Error creating MongoDB client");
-
-    db_client
-        .database(&env::var("AZUMA_DBNAME").expect("Environment variable AZUMA_DBNAME not found"))
+pub async fn create_pool() -> PgPool {
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(
+            &env::var("AZUMA_POSTGRESQL").expect("Environment variable AZUMA_POSTGRESQL not found"),
+        )
+        .await
+        .expect("Couldn't connect to PostgreSQL database");
+    migrate!("./migrations")
+        .run(&pool)
+        .await
+        .expect("Couldn't run migrations");
+    pool
 }
 
-pub fn with_db(db: Database) -> impl Filter<Extract = (Database,), Error = Infallible> + Clone {
-    any().map(move || db.clone())
+pub fn with_pool(pool: PgPool) -> impl Filter<Extract = (PgPool,), Error = Infallible> + Clone {
+    any().map(move || pool.clone())
 }
-
-/*static mut DATABASE: Option<Database> = None;
-
-pub async fn db() -> Database {
-    /*unsafe {
-        if let Some(db) = &DATABASE {
-            db.clone()
-        } else {
-            let db_client = Client::with_uri_str(
-                &env::var("AZUMA_MONGODB").expect("Environment variable AZUMA_MONGODB not found"),
-            )
-            .await
-            .expect("Error creating MongoDB client");
-
-            let db = db_client.database(
-                &env::var("AZUMA_DBNAME").expect("Environment variable AZUMA_DBNAME not found"),
-            );
-
-            DATABASE = Some(db.clone());
-            db
-        }
-    }*/
-    let db_client = Client::with_uri_str(
-        &env::var("AZUMA_MONGODB").expect("Environment variable AZUMA_MONGODB not found"),
-    )
-    .await
-    .expect("Error creating MongoDB client");
-
-    db_client
-        .database(&env::var("AZUMA_DBNAME").expect("Environment variable AZUMA_DBNAME not found"))
-}
-*/
