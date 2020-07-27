@@ -1,7 +1,11 @@
 use serde::Serialize;
 use sqlx::Error as SqlxError;
 use std::{convert::Infallible, io::Error as IoError};
-use warp::{http::StatusCode, reject, reply, Rejection, Reply};
+use warp::{
+    http::StatusCode,
+    reject::{self, MethodNotAllowed, UnsupportedMediaType},
+    reply, Rejection, Reply,
+};
 
 #[derive(Debug)]
 pub enum AzumaRejection {
@@ -58,6 +62,15 @@ pub async fn handle_rejection(rej: Rejection) -> Result<impl Reply, Infallible> 
     } else if let Some(AzumaRejection::Unauthorized) = rej.find() {
         code = StatusCode::UNAUTHORIZED;
         message = "UNAUTHORIZED";
+    } else if let Some(_) = rej.find::<UnsupportedMediaType>() {
+        code = StatusCode::UNSUPPORTED_MEDIA_TYPE;
+        message = "UNSUPPORTED_MEDIA_TYPE";
+    } else if let Some(_) = rej.find::<MethodNotAllowed>() {
+        // method not allowed is usually returned by at least one filter, so it is often in the rejection and
+        // is thus at the end of the rejection chain so in case other rejections are there, these will be returned
+        // due to how the warp-filter-rejection-chain works, not found is also returned as method not allowed
+        code = StatusCode::METHOD_NOT_ALLOWED;
+        message = "METHOD_NOT_ALLOWED_OR_NOT_FOUND";
     } else {
         code = StatusCode::INTERNAL_SERVER_ERROR;
         message = "UNHANDLED_REJECTION";

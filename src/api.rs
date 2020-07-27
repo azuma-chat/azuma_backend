@@ -14,7 +14,7 @@ pub struct ApiVersion {
 }
 
 pub async fn api(pool: PgPool) -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
-    let api_version = any().and(path::end()).map(|| {
+    let api_version = path::end().map(|| {
         reply::json(&ApiVersion {
             version: env!("CARGO_PKG_VERSION"),
         })
@@ -39,7 +39,7 @@ pub async fn api(pool: PgPool) -> impl Filter<Extract = (impl Reply,), Error = I
         .and(with_pool(pool))
         .and_then(user::me_handler);
 
-    let user_routes = login_route.or(registration_route.or(me_route));
+    let user_routes = login_route.or(registration_route).or(me_route);
 
     any()
         .and(api_version.or(user_routes))
